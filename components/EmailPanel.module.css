@@ -1,0 +1,38 @@
+.email {
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--gridline);
+}
+
+.email:last-child {
+  border-bottom: none;
+}
+
+.emailHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.from {
+  font-weight: 600;
+}
+
+.time {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.subject {
+  margin-top: 0.15rem;
+}
+
+.snippet {
+  margin-top: 0.15rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

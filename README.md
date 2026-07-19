@@ -8,7 +8,7 @@ shared family to-do list, built for a wall-mounted tablet.
 - [x] Static dashboard layout with mock data (Calendar / Email / Family To-Do
       panels, clock)
 - [x] Passcode gate
-- [ ] Google Cloud project + OAuth connection (Calendar, Gmail, Tasks)
+- [x] Google Cloud project + OAuth connection (Calendar, Gmail, Tasks)
 - [ ] Real calendar data
 - [ ] Real email data
 - [ ] Real to-do list (Google Tasks-backed, dedicated "Family" list)
@@ -16,6 +16,12 @@ shared family to-do list, built for a wall-mounted tablet.
 
 The full manual setup checklist (Google Cloud Console, Vercel, Neon) will
 land in this README as those pieces are built.
+
+Once deployed with the env vars below set, visit `/settings` (behind the
+passcode gate) and click "Connect Google Account" to link the family Google
+account — this powers Calendar, Gmail, and Tasks. A second, Gmail-only
+"Connect another inbox" flow lands in a later phase for collating additional
+personal inboxes into the Email panel.
 
 ## Stack
 
@@ -26,8 +32,11 @@ refresh token.
 
 ## Local development
 
-Copy `.env.example` to `.env.local` and fill in `DASHBOARD_PASSCODE` and
-`SESSION_SECRET` (generate the latter with `openssl rand -base64 32`).
+Copy `.env.example` to `.env.local` and fill in at least `DASHBOARD_PASSCODE`
+and `SESSION_SECRET` (generate the latter with `openssl rand -base64 32`) to
+run the dashboard and gate locally. The Google/`DATABASE_URL` variables are
+only needed once you want `/settings` and the OAuth flow working locally too
+— without them the rest of the app still runs, `/settings` just errors.
 
 ```bash
 npm install

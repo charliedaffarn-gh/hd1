@@ -44,6 +44,21 @@
   margin: 0;
 }
 
+.hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.accountList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
 .button {
   align-self: flex-start;
   padding: 0.65rem 1.25rem;

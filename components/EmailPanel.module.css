@@ -1,10 +1,19 @@
+.message {
+  color: var(--text-secondary);
+}
+
 .email {
-  padding: 0.6rem 0;
+  padding: 0.6rem 0 0.6rem 0.6rem;
   border-bottom: 1px solid var(--gridline);
+  border-left: 3px solid transparent;
 }
 
 .email:last-child {
   border-bottom: none;
+}
+
+.important {
+  border-left-color: var(--status-warning);
 }
 
 .emailHeader {
@@ -26,6 +35,29 @@
 
 .subject {
   margin-top: 0.15rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.subjectText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.sourceTag {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--page-plane);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.05rem 0.5rem;
+  text-transform: lowercase;
 }
 
 .snippet {

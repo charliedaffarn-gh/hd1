@@ -25,6 +25,16 @@ export async function getPrimaryRefreshToken(): Promise<string | null> {
   return (rows[0]?.refreshToken as string | undefined) ?? null;
 }
 
+export async function listAccountsWithTokens(): Promise<
+  { email: string; refreshToken: string }[]
+> {
+  const sql = getDb();
+  const rows = await sql`
+    select email, refresh_token as "refreshToken" from google_accounts
+  `;
+  return rows as { email: string; refreshToken: string }[];
+}
+
 export async function upsertAccount(params: {
   email: string;
   refreshToken?: string;

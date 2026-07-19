@@ -10,7 +10,7 @@ shared family to-do list, built for a wall-mounted tablet.
 - [x] Passcode gate
 - [x] Google Cloud project + OAuth connection (Calendar, Gmail, Tasks)
 - [x] Real calendar data
-- [ ] Real email data
+- [x] Real email data (collated across multiple connected inboxes)
 - [ ] Real to-do list (Google Tasks-backed, dedicated "Family" list)
 - [ ] Kitchen-tablet polish (kiosk mode, resilience, final setup docs)
 
@@ -19,9 +19,10 @@ land in this README as those pieces are built.
 
 Once deployed with the env vars below set, visit `/settings` (behind the
 passcode gate) and click "Connect Google Account" to link the family Google
-account — this powers Calendar, Gmail, and Tasks. A second, Gmail-only
-"Connect another inbox" flow lands in a later phase for collating additional
-personal inboxes into the Email panel.
+account — this powers Calendar, Tasks, and one Email source. From the same
+page, "Connect another Gmail inbox" links additional personal inboxes
+(Gmail-only access) into the same collated Email panel, each tagged by
+sender inbox, with Gmail's own "Important" flag highlighted.
 
 ## Stack
 

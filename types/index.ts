@@ -13,6 +13,8 @@ export interface EmailMessage {
   subject: string;
   snippet: string;
   receivedAt: string; // ISO 8601
+  sourceEmail: string;
+  important: boolean;
 }
 
 export interface Task {

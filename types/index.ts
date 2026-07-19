@@ -7,14 +7,18 @@ export interface CalendarEvent {
   calendarName?: string;
 }
 
-export interface EmailMessage {
+export interface RawEmailMessage {
   id: string;
   from: string;
   subject: string;
   snippet: string;
   receivedAt: string; // ISO 8601
   sourceEmail: string;
-  important: boolean;
+}
+
+// A raw message that Claude's nightly triage flagged as needing attention.
+export interface EmailMessage extends RawEmailMessage {
+  reason: string;
 }
 
 export interface Task {

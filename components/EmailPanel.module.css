@@ -5,15 +5,11 @@
 .email {
   padding: 0.6rem 0 0.6rem 0.6rem;
   border-bottom: 1px solid var(--gridline);
-  border-left: 3px solid transparent;
+  border-left: 3px solid var(--status-warning);
 }
 
 .email:last-child {
   border-bottom: none;
-}
-
-.important {
-  border-left-color: var(--status-warning);
 }
 
 .emailHeader {
@@ -60,11 +56,18 @@
   text-transform: lowercase;
 }
 
-.snippet {
+.reason {
   margin-top: 0.15rem;
   color: var(--text-secondary);
   font-size: 0.9rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.updatedAt {
+  margin-top: 0.6rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-align: right;
 }

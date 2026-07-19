@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
-import { getInboxSummary } from "@/lib/google/gmail";
+import { getCachedDigest } from "@/lib/email-digest";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const messages = await getInboxSummary();
-    return NextResponse.json({ messages });
+    const digest = await getCachedDigest();
+    return NextResponse.json({
+      messages: digest?.items ?? [],
+      computedAt: digest?.computedAt ?? null,
+    });
   } catch (err) {
-    console.error("Failed to fetch Gmail messages:", err);
-    return NextResponse.json({ error: "Failed to fetch email" }, { status: 502 });
+    console.error("Failed to load email digest:", err);
+    return NextResponse.json({ error: "Failed to load email" }, { status: 502 });
   }
 }

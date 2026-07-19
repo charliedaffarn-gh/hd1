@@ -1,7 +1,7 @@
 import { google, type gmail_v1 } from "googleapis";
 import { listAccountsWithTokens } from "@/lib/accounts";
 import { buildOAuth2Client } from "./oauth";
-import type { EmailMessage } from "@/types";
+import type { RawEmailMessage } from "@/types";
 
 const MAX_MESSAGES_PER_ACCOUNT = 10;
 
@@ -17,7 +17,10 @@ function parseFromName(from: string): string {
   return (match ? match[1] : from).trim();
 }
 
-async function getAccountMessages(email: string, refreshToken: string): Promise<EmailMessage[]> {
+async function getAccountMessages(
+  email: string,
+  refreshToken: string,
+): Promise<RawEmailMessage[]> {
   const client = buildOAuth2Client();
   client.setCredentials({ refresh_token: refreshToken });
   const gmail = google.gmail({ version: "v1", auth: client });
@@ -51,18 +54,17 @@ async function getAccountMessages(email: string, refreshToken: string): Promise<
       ? new Date(Number(message.internalDate)).toISOString()
       : new Date().toISOString(),
     sourceEmail: email,
-    important: message.labelIds?.includes("IMPORTANT") ?? false,
   }));
 }
 
-export async function getInboxSummary(): Promise<EmailMessage[]> {
+export async function getInboxSummary(): Promise<RawEmailMessage[]> {
   const accounts = await listAccountsWithTokens();
 
   const results = await Promise.allSettled(
     accounts.map((account) => getAccountMessages(account.email, account.refreshToken)),
   );
 
-  const messages: EmailMessage[] = [];
+  const messages: RawEmailMessage[] = [];
   results.forEach((result, index) => {
     if (result.status !== "fulfilled") {
       console.error(`Failed to fetch Gmail for "${accounts[index].email}":`, result.reason);

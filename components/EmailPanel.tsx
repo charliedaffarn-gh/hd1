@@ -8,7 +8,12 @@ import styles from "./EmailPanel.module.css";
 
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
-async function fetcher(url: string): Promise<{ messages: EmailMessage[] }> {
+interface DigestResponse {
+  messages: EmailMessage[];
+  computedAt: string | null;
+}
+
+async function fetcher(url: string): Promise<DigestResponse> {
   const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to load email");
   return res.json();
@@ -19,11 +24,9 @@ function sourceLabel(email: string): string {
 }
 
 export default function EmailPanel() {
-  const { data, error, isLoading } = useSWR<{ messages: EmailMessage[] }>(
-    "/api/gmail",
-    fetcher,
-    { refreshInterval: REFRESH_INTERVAL_MS },
-  );
+  const { data, error, isLoading } = useSWR<DigestResponse>("/api/gmail", fetcher, {
+    refreshInterval: REFRESH_INTERVAL_MS,
+  });
 
   if (isLoading) {
     return (
@@ -42,38 +45,43 @@ export default function EmailPanel() {
   }
 
   const messages = data?.messages ?? [];
+  const computedAt = data?.computedAt ?? null;
   const sourceCount = new Set(messages.map((message) => message.sourceEmail)).size;
 
-  if (messages.length === 0) {
+  if (!computedAt) {
     return (
       <Panel title="Email">
-        <p className={styles.message}>No unread mail.</p>
+        <p className={styles.message}>No digest yet &mdash; the overnight triage hasn&rsquo;t run.</p>
       </Panel>
     );
   }
 
   return (
     <Panel title="Email">
-      {messages.map((email) => (
-        <div
-          key={email.id}
-          className={email.important ? `${styles.email} ${styles.important}` : styles.email}
-        >
-          <div className={styles.emailHeader}>
-            <span className={styles.from}>{email.from}</span>
-            <span className={styles.time}>
-              <RelativeTime iso={email.receivedAt} />
-            </span>
+      {messages.length === 0 ? (
+        <p className={styles.message}>Nothing needs attention right now.</p>
+      ) : (
+        messages.map((email) => (
+          <div key={email.id} className={styles.email}>
+            <div className={styles.emailHeader}>
+              <span className={styles.from}>{email.from}</span>
+              <span className={styles.time}>
+                <RelativeTime iso={email.receivedAt} />
+              </span>
+            </div>
+            <div className={styles.subject}>
+              <span className={styles.subjectText}>{email.subject}</span>
+              {sourceCount > 1 && (
+                <span className={styles.sourceTag}>{sourceLabel(email.sourceEmail)}</span>
+              )}
+            </div>
+            <div className={styles.reason}>{email.reason}</div>
           </div>
-          <div className={styles.subject}>
-            <span className={styles.subjectText}>{email.subject}</span>
-            {sourceCount > 1 && (
-              <span className={styles.sourceTag}>{sourceLabel(email.sourceEmail)}</span>
-            )}
-          </div>
-          <div className={styles.snippet}>{email.snippet}</div>
-        </div>
-      ))}
+        ))
+      )}
+      <p className={styles.updatedAt}>
+        Updated <RelativeTime iso={computedAt} />
+      </p>
     </Panel>
   );
 }

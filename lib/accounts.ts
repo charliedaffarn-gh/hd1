@@ -17,6 +17,14 @@ export async function listGoogleAccounts(): Promise<GoogleAccount[]> {
   return rows as GoogleAccount[];
 }
 
+export async function getPrimaryRefreshToken(): Promise<string | null> {
+  const sql = getDb();
+  const rows = await sql`
+    select refresh_token as "refreshToken" from google_accounts where is_primary limit 1
+  `;
+  return (rows[0]?.refreshToken as string | undefined) ?? null;
+}
+
 export async function upsertAccount(params: {
   email: string;
   refreshToken?: string;

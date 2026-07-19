@@ -1,3 +1,7 @@
+.message {
+  color: var(--text-secondary);
+}
+
 .group {
   margin-bottom: 1rem;
 }

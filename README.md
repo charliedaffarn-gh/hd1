@@ -9,7 +9,7 @@ shared family to-do list, built for a wall-mounted tablet.
       panels, clock)
 - [x] Passcode gate
 - [x] Google Cloud project + OAuth connection (Calendar, Gmail, Tasks)
-- [ ] Real calendar data
+- [x] Real calendar data
 - [ ] Real email data
 - [ ] Real to-do list (Google Tasks-backed, dedicated "Family" list)
 - [ ] Kitchen-tablet polish (kiosk mode, resilience, final setup docs)

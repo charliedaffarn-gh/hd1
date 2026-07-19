@@ -1,24 +1,44 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import useSWR, { mutate } from "swr";
 import Panel from "./Panel";
 import type { Task } from "@/types";
 import styles from "./TasksPanel.module.css";
 
-const initialMockTasks: Task[] = [
-  { id: "1", title: "Buy milk", done: false },
-  { id: "2", title: "Pack lunches", done: false },
-  { id: "3", title: "Book dentist appointment", done: true },
-  { id: "4", title: "Sign school permission slip", done: false },
-];
+const REFRESH_INTERVAL_MS = 60 * 1000;
+const TASKS_KEY = "/api/tasks";
+
+async function fetcher(url: string): Promise<{ tasks: Task[] }> {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Failed to load tasks");
+  return res.json();
+}
 
 export default function TasksPanel() {
-  const [tasks, setTasks] = useState<Task[]>(initialMockTasks);
+  const { data, error, isLoading } = useSWR<{ tasks: Task[] }>(TASKS_KEY, fetcher, {
+    refreshInterval: REFRESH_INTERVAL_MS,
+  });
   const [newTitle, setNewTitle] = useState("");
 
-  function toggleTask(id: string) {
-    setTasks((prev) =>
-      prev.map((task) => (task.id === id ? { ...task, done: !task.done } : task)),
+  const tasks = data?.tasks ?? [];
+
+  function toggleTask(task: Task) {
+    const done = !task.done;
+    const optimisticTasks = tasks.map((t) => (t.id === task.id ? { ...t, done } : t));
+
+    mutate(
+      TASKS_KEY,
+      async () => {
+        const res = await fetch(`/api/tasks/${task.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ done }),
+        });
+        if (!res.ok) throw new Error("Failed to update task");
+        return { tasks: optimisticTasks };
+      },
+      { optimisticData: { tasks: optimisticTasks }, rollbackOnError: true, revalidate: false },
     );
   }
 
@@ -26,8 +46,18 @@ export default function TasksPanel() {
     e.preventDefault();
     const title = newTitle.trim();
     if (!title) return;
-    setTasks((prev) => [...prev, { id: crypto.randomUUID(), title, done: false }]);
     setNewTitle("");
+
+    mutate(TASKS_KEY, async () => {
+      const res = await fetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title }),
+      });
+      if (!res.ok) throw new Error("Failed to create task");
+      const { task } = (await res.json()) as { task: Task };
+      return { tasks: [...tasks, task] };
+    });
   }
 
   return (
@@ -48,21 +78,29 @@ export default function TasksPanel() {
         </form>
       }
     >
-      <ul className={styles.list}>
-        {tasks.map((task) => (
-          <li key={task.id} className={styles.item}>
-            <label className={styles.label}>
-              <input
-                type="checkbox"
-                checked={task.done}
-                onChange={() => toggleTask(task.id)}
-                className={styles.checkbox}
-              />
-              <span className={task.done ? styles.doneText : undefined}>{task.title}</span>
-            </label>
-          </li>
-        ))}
-      </ul>
+      {isLoading ? (
+        <p className={styles.message}>Loading…</p>
+      ) : error ? (
+        <p className={styles.message}>Couldn&rsquo;t load tasks.</p>
+      ) : tasks.length === 0 ? (
+        <p className={styles.message}>No tasks yet.</p>
+      ) : (
+        <ul className={styles.list}>
+          {tasks.map((task) => (
+            <li key={task.id} className={styles.item}>
+              <label className={styles.label}>
+                <input
+                  type="checkbox"
+                  checked={task.done}
+                  onChange={() => toggleTask(task)}
+                  className={styles.checkbox}
+                />
+                <span className={task.done ? styles.doneText : undefined}>{task.title}</span>
+              </label>
+            </li>
+          ))}
+        </ul>
+      )}
     </Panel>
   );
 }

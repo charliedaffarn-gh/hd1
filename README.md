@@ -13,7 +13,7 @@ shared family to-do list, built for a wall-mounted tablet.
 - [x] Real email data (collated across multiple connected inboxes)
 - [x] Nightly Claude-based email triage (replaces Gmail's native "Important"
       label with an LLM-curated "needs attention" list + one-line reason)
-- [ ] Real to-do list (Google Tasks-backed, dedicated "Family" list)
+- [x] Real to-do list (Google Tasks-backed, dedicated "Family" list)
 - [ ] Kitchen-tablet polish (kiosk mode, resilience, final setup docs)
 
 The full manual setup checklist (Google Cloud Console, Vercel, Neon) will
@@ -24,6 +24,12 @@ passcode gate) and click "Connect Google Account" to link the family Google
 account — this powers Calendar, Tasks, and one Email source. From the same
 page, "Connect another Gmail inbox" links additional personal inboxes
 (Gmail-only access) into the same collated Email panel.
+
+The Family To-Do panel reads and writes a dedicated Google Tasks list (name
+set by `GOOGLE_TASKLIST_NAME`, default "Family") on the primary account,
+created automatically the first time the app looks for it. Checking a task
+off on the tablet updates Google Tasks directly, so it stays in sync with
+the Google Tasks app on everyone's phone too.
 
 Unread mail across every connected inbox is triaged once a night by Claude
 (Haiku) via a Vercel Cron job (`vercel.json`, `/api/cron/email-digest`,

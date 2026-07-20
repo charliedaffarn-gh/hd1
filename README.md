@@ -33,12 +33,21 @@ the Google Tasks app on everyone's phone too.
 
 Unread mail across every connected inbox is triaged once a night by Claude
 (Haiku) via a Vercel Cron job (`vercel.json`, `/api/cron/email-digest`,
-protected by `CRON_SECRET`) and cached in Postgres. The Email panel only
-ever reads that cached digest — genuinely time-sensitive items (school
+protected by `CRON_SECRET`) and cached in Postgres. The Email panel reads
+that cached digest on every poll — genuinely time-sensitive items (school
 notices, deliveries, bills, RSVPs) each get a short reason; marketing and
-newsletters are filtered out entirely. The dashboard's live poll never
-calls Google or Anthropic directly, so it stays fast and cheap regardless
-of how often the tablet refreshes.
+newsletters are filtered out entirely.
+
+Alongside the nightly triage, any message manually labeled
+**`NeedsAttention`** (name configurable via `GMAIL_ATTENTION_LABEL`) in any
+connected Gmail account is checked live on every poll and shown
+immediately — no need to wait for the next overnight run. This is a plain
+Gmail label, so create it once in each connected account's Gmail (Settings
+→ Labels, or just "Create new" from the label list while viewing an email)
+and apply it to anything that should show up on the dashboard right away.
+Removing the label drops it off the dashboard on the next refresh. This
+path needs no Anthropic API key — it works even before `ANTHROPIC_API_KEY`
+is set up.
 
 ## Stack
 

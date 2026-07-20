@@ -48,18 +48,14 @@ export default function EmailPanel() {
   const computedAt = data?.computedAt ?? null;
   const sourceCount = new Set(messages.map((message) => message.sourceEmail)).size;
 
-  if (!computedAt) {
-    return (
-      <Panel title="Email">
-        <p className={styles.message}>No digest yet &mdash; the overnight triage hasn&rsquo;t run.</p>
-      </Panel>
-    );
-  }
-
   return (
     <Panel title="Email">
       {messages.length === 0 ? (
-        <p className={styles.message}>Nothing needs attention right now.</p>
+        <p className={styles.message}>
+          {computedAt
+            ? "Nothing needs attention right now."
+            : "No digest yet — the overnight triage hasn’t run. Mail labeled NeedsAttention still shows up here."}
+        </p>
       ) : (
         messages.map((email) => (
           <div key={email.id} className={styles.email}>
@@ -79,9 +75,11 @@ export default function EmailPanel() {
           </div>
         ))
       )}
-      <p className={styles.updatedAt}>
-        Updated <RelativeTime iso={computedAt} />
-      </p>
+      {computedAt && (
+        <p className={styles.updatedAt}>
+          Triage updated <RelativeTime iso={computedAt} />
+        </p>
+      )}
     </Panel>
   );
 }

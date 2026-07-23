@@ -16,7 +16,7 @@
   display: grid;
   /* Email carries the longest text (subjects, reasons) and needs the most
      room; task titles are short one-liners and read fine narrower. */
-  grid-template-columns: 1fr 1.5fr 0.75fr;
+  grid-template-columns: 1fr 0.75fr 1.5fr;
   gap: 1.5rem;
 }
 

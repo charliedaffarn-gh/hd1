@@ -12,8 +12,8 @@ export default function DashboardGrid() {
       </header>
       <div className={styles.panels}>
         <CalendarPanel />
-        <EmailPanel />
         <TasksPanel />
+        <EmailPanel />
       </div>
     </div>
   );

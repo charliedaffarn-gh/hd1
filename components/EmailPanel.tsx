@@ -1,12 +1,13 @@
 "use client";
 
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import Panel from "./Panel";
 import RelativeTime from "./RelativeTime";
 import type { EmailMessage } from "@/types";
 import styles from "./EmailPanel.module.css";
 
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+const EMAIL_KEY = "/api/gmail";
 
 interface DigestResponse {
   messages: EmailMessage[];
@@ -23,8 +24,26 @@ function sourceLabel(email: string): string {
   return email.split("@")[0];
 }
 
+function dismiss(id: string, messages: EmailMessage[], computedAt: string | null) {
+  const remaining = messages.filter((message) => message.id !== id);
+
+  mutate(
+    EMAIL_KEY,
+    async () => {
+      const res = await fetch("/api/gmail/dismiss", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      if (!res.ok) throw new Error("Failed to dismiss");
+      return { messages: remaining, computedAt };
+    },
+    { optimisticData: { messages: remaining, computedAt }, rollbackOnError: true, revalidate: false },
+  );
+}
+
 export default function EmailPanel() {
-  const { data, error, isLoading } = useSWR<DigestResponse>("/api/gmail", fetcher, {
+  const { data, error, isLoading } = useSWR<DigestResponse>(EMAIL_KEY, fetcher, {
     refreshInterval: REFRESH_INTERVAL_MS,
   });
 
@@ -59,19 +78,29 @@ export default function EmailPanel() {
       ) : (
         messages.map((email) => (
           <div key={email.id} className={styles.email}>
-            <div className={styles.emailHeader}>
-              <span className={styles.from}>{email.from}</span>
-              <span className={styles.time}>
-                <RelativeTime iso={email.receivedAt} />
-              </span>
+            <label className={styles.dismissLabel}>
+              <input
+                type="checkbox"
+                className={styles.checkbox}
+                onChange={() => dismiss(email.id, messages, computedAt)}
+                aria-label={`Dismiss: ${email.subject}`}
+              />
+            </label>
+            <div className={styles.emailContent}>
+              <div className={styles.emailHeader}>
+                <span className={styles.from}>{email.from}</span>
+                <span className={styles.time}>
+                  <RelativeTime iso={email.receivedAt} />
+                </span>
+              </div>
+              <div className={styles.subject}>
+                <span className={styles.subjectText}>{email.subject}</span>
+                {sourceCount > 1 && (
+                  <span className={styles.sourceTag}>{sourceLabel(email.sourceEmail)}</span>
+                )}
+              </div>
+              <div className={styles.reason}>{email.reason}</div>
             </div>
-            <div className={styles.subject}>
-              <span className={styles.subjectText}>{email.subject}</span>
-              {sourceCount > 1 && (
-                <span className={styles.sourceTag}>{sourceLabel(email.sourceEmail)}</span>
-              )}
-            </div>
-            <div className={styles.reason}>{email.reason}</div>
           </div>
         ))
       )}

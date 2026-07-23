@@ -19,3 +19,10 @@ create table if not exists email_digest (
   items jsonb not null,
   constraint email_digest_singleton check (id = 1)
 );
+
+-- Message ids dismissed from the dashboard's Email panel. Dashboard-side
+-- only: does not touch the message or any label in Gmail itself.
+create table if not exists dismissed_emails (
+  message_id text primary key,
+  dismissed_at timestamptz not null default now()
+);

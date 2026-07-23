@@ -3,6 +3,9 @@
 }
 
 .email {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
   padding: 0.6rem 0 0.6rem 0.6rem;
   border-bottom: 1px solid var(--gridline);
   border-left: 3px solid var(--status-warning);
@@ -10,6 +13,23 @@
 
 .email:last-child {
   border-bottom: none;
+}
+
+.dismissLabel {
+  flex-shrink: 0;
+  padding-top: 0.15rem;
+  cursor: pointer;
+}
+
+.checkbox {
+  width: 1.5rem;
+  height: 1.5rem;
+  accent-color: var(--accent);
+}
+
+.emailContent {
+  flex: 1;
+  min-width: 0;
 }
 
 .emailHeader {

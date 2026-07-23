@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCachedDigest } from "@/lib/email-digest";
 import { getFlaggedMessages } from "@/lib/google/gmail";
+import { getDismissedIds } from "@/lib/dismissed";
 import type { EmailMessage } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -9,12 +10,13 @@ const FLAGGED_REASON = "Flagged for attention.";
 
 export async function GET() {
   try {
-    const [digest, flagged] = await Promise.all([
+    const [digest, flagged, dismissed] = await Promise.all([
       getCachedDigest(),
       getFlaggedMessages().catch((err) => {
         console.error("Failed to fetch flagged Gmail messages:", err);
         return [];
       }),
+      getDismissedIds(),
     ]);
 
     // Cached nightly Claude triage and the live "manually flagged" lookup
@@ -30,9 +32,9 @@ export async function GET() {
       }
     }
 
-    const messages = Array.from(byId.values()).sort((a, b) =>
-      b.receivedAt.localeCompare(a.receivedAt),
-    );
+    const messages = Array.from(byId.values())
+      .filter((message) => !dismissed.has(message.id))
+      .sort((a, b) => b.receivedAt.localeCompare(a.receivedAt));
 
     return NextResponse.json({ messages, computedAt: digest?.computedAt ?? null });
   } catch (err) {

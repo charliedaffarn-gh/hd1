@@ -66,6 +66,13 @@ Removing the label drops it off the dashboard on the next refresh. This
 path needs no Anthropic API key — it works even before `ANTHROPIC_API_KEY`
 is set up.
 
+Each item in the Email panel has a checkbox to dismiss it once you've
+dealt with it. This is dashboard-side only — it hides the message from
+future polls (even if the triage or a label would otherwise keep
+resurfacing it) but never modifies Gmail itself, since the app only ever
+has read-only Gmail access by design. If you want it gone from Gmail too,
+archive or unlabel it there separately.
+
 ## Stack
 
 Next.js (App Router) + TypeScript, deployed on Vercel. Calendar, email, and

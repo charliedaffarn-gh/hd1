@@ -6,6 +6,7 @@ import type { RawEmailMessage } from "@/types";
 const MAX_UNREAD_PER_ACCOUNT = 10;
 const MAX_FLAGGED_PER_ACCOUNT = 20;
 const DEFAULT_ATTENTION_LABEL = "NeedsAttention";
+const DEFAULT_TRIAGE_MAX_AGE_DAYS = 30;
 
 function getHeader(message: gmail_v1.Schema$Message, name: string): string {
   const header = message.payload?.headers?.find(
@@ -21,6 +22,11 @@ function parseFromName(from: string): string {
 
 function getAttentionLabel(): string {
   return process.env.GMAIL_ATTENTION_LABEL?.trim() || DEFAULT_ATTENTION_LABEL;
+}
+
+function getTriageMaxAgeDays(): number {
+  const parsed = Number(process.env.GMAIL_TRIAGE_MAX_AGE_DAYS);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_TRIAGE_MAX_AGE_DAYS;
 }
 
 async function fetchAccountMessages(
@@ -91,7 +97,11 @@ async function fetchAcrossAccounts(
 }
 
 export async function getInboxSummary(): Promise<RawEmailMessage[]> {
-  return fetchAcrossAccounts("is:unread in:inbox", MAX_UNREAD_PER_ACCOUNT);
+  // Some inboxes carry years of unread backlog that was never going to get
+  // triaged — cap how far back the digest looks so old mail doesn't crowd
+  // out (or just add noise to) what's actually current.
+  const maxAgeDays = getTriageMaxAgeDays();
+  return fetchAcrossAccounts(`is:unread in:inbox newer_than:${maxAgeDays}d`, MAX_UNREAD_PER_ACCOUNT);
 }
 
 // Mail any family member has manually labeled as needing attention, across

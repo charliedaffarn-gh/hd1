@@ -4,9 +4,10 @@ import { getInboxSummary } from "@/lib/google/gmail";
 
 export const dynamic = "force-dynamic";
 
-// Read-only feed of unread mail across every connected account, for an
-// external triage actor (currently: a nightly Claude Code Routine) to read
-// and judge itself, then POST the curated result to POST /api/cron/email-digest.
+// Read-only feed of recent inbox mail (read or unread) across every
+// connected account, for an external triage actor (currently: a nightly
+// Claude Code Routine) to read and judge itself, then POST the curated
+// result to POST /api/cron/email-digest.
 // Same DIGEST_IMPORT_SECRET bearer auth as that route; excluded from the
 // passcode-gate matcher in proxy.ts (grouped under /api/cron) since the
 // caller can't carry a session cookie.

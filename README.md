@@ -1,7 +1,7 @@
 # Family Dashboard
 
-An always-on dashboard for the kitchen: today's calendar, unread email, and a
-shared family to-do list, built for a wall-mounted tablet.
+An always-on dashboard for the kitchen: today's calendar, email that needs
+attention, and a shared family to-do list, built for a wall-mounted tablet.
 
 ## Status
 
@@ -31,21 +31,25 @@ created automatically the first time the app looks for it. Checking a task
 off on the tablet updates Google Tasks directly, so it stays in sync with
 the Google Tasks app on everyone's phone too.
 
-Unread mail across every connected inbox is triaged once a night and cached
-in Postgres; the Email panel just reads that cached digest on every poll —
-genuinely time-sensitive items (school notices, deliveries, bills, RSVPs)
-each get a short reason, marketing and newsletters are filtered out
-entirely. There are two independent ways this digest gets computed, and
-either (or both) can be running at once — whichever last wrote the
-`email_digest` row is what the panel shows:
+Recent inbox mail across every connected account — read or unread, within
+the last `GMAIL_TRIAGE_MAX_AGE_DAYS` (default 30) — is triaged once a
+night and cached in Postgres; the Email panel just reads that cached
+digest on every poll. Genuinely time-sensitive items (school notices,
+deliveries, bills, RSVPs) each get a short reason, marketing and
+newsletters are filtered out entirely, and unread status plays no part in
+the judgment — a read-but-unactioned notice is exactly what this should
+still catch. Archiving a message in Gmail is what keeps it out of future
+runs. There are two independent ways this digest gets computed, and either
+(or both) can be running at once — whichever last wrote the `email_digest`
+row is what the panel shows:
 
 1. **Vercel Cron + Anthropic API** (`vercel.json`, `GET /api/cron/email-digest`,
    `CRON_SECRET`-protected): the original path, fires nightly, calls Claude
    Haiku directly via `ANTHROPIC_API_KEY`. Small ongoing API cost.
 2. **A Claude Code Routine, no API key needed**: a scheduled Routine reads
-   `GET /api/cron/raw-inbox` (same unread-mail fan-out as above, just
-   exposed read-only), does the same triage judgment itself as part of an
-   agent turn instead of a metered API call, then writes the result via
+   `GET /api/cron/raw-inbox` (same inbox fan-out as above, just exposed
+   read-only), does the same triage judgment itself as part of an agent
+   turn instead of a metered API call, then writes the result via
    `POST /api/cron/email-digest`. Both new routes share one
    `DIGEST_IMPORT_SECRET` bearer secret. Costs nothing beyond your existing
    Claude usage; the tradeoff is it depends on that Routine continuing to

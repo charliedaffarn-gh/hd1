@@ -28,7 +28,7 @@ const TriageResultSchema = z.object({
   ),
 });
 
-const SYSTEM_PROMPT = `You are triaging unread email for a family's kitchen dashboard. You will receive a JSON array of unread messages, each with an id, sender, subject, and a short snippet.
+const SYSTEM_PROMPT = `You are triaging recent inbox email for a family's kitchen dashboard. You will receive a JSON array of messages (read or unread), each with an id, sender, subject, and a short snippet.
 
 Return only the messages that genuinely need the family's attention soon: school notices and reminders, deliveries arriving today or very soon, appointment or event reminders, bills or payments due, RSVPs, and personal messages from real people they know.
 

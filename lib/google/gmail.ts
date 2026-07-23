@@ -3,7 +3,7 @@ import { listAccountsWithTokens } from "@/lib/accounts";
 import { buildOAuth2Client } from "./oauth";
 import type { RawEmailMessage } from "@/types";
 
-const MAX_UNREAD_PER_ACCOUNT = 10;
+const MAX_TRIAGE_CANDIDATES_PER_ACCOUNT = 40;
 const MAX_FLAGGED_PER_ACCOUNT = 20;
 const DEFAULT_ATTENTION_LABEL = "NeedsAttention";
 const DEFAULT_TRIAGE_MAX_AGE_DAYS = 30;
@@ -96,12 +96,15 @@ async function fetchAcrossAccounts(
   return messages;
 }
 
+// Not filtered to unread — a read-but-unactioned school notice or bill is
+// exactly what the triage should still catch, unread was never a reliable
+// signal of importance. Bounded by recency instead: some inboxes carry
+// years of backlog that was never going to get triaged, so cap how far
+// back the digest looks. Archiving a message (removing it from the inbox)
+// is the practical way to keep something out of future runs.
 export async function getInboxSummary(): Promise<RawEmailMessage[]> {
-  // Some inboxes carry years of unread backlog that was never going to get
-  // triaged — cap how far back the digest looks so old mail doesn't crowd
-  // out (or just add noise to) what's actually current.
   const maxAgeDays = getTriageMaxAgeDays();
-  return fetchAcrossAccounts(`is:unread in:inbox newer_than:${maxAgeDays}d`, MAX_UNREAD_PER_ACCOUNT);
+  return fetchAcrossAccounts(`in:inbox newer_than:${maxAgeDays}d`, MAX_TRIAGE_CANDIDATES_PER_ACCOUNT);
 }
 
 // Mail any family member has manually labeled as needing attention, across

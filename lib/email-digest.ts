@@ -21,17 +21,11 @@ export async function getCachedDigest(): Promise<EmailDigest | null> {
   return row ? { computedAt: row.computedAt, items: row.items } : null;
 }
 
-export async function computeAndStoreDigest(): Promise<EmailDigest> {
-  const messages = await getInboxSummary();
-  const triaged = await triageEmails(messages);
-
-  const byId = new Map(messages.map((message) => [message.id, message]));
-  const items: EmailMessage[] = [];
-  for (const { id, reason } of triaged) {
-    const message = byId.get(id);
-    if (message) items.push({ ...message, reason });
-  }
-
+// Shared by both digest sources: the Anthropic-API cron path below, and the
+// Routine-based path (see app/api/cron/email-digest/route.ts POST handler)
+// that does the same triage judgment inside a Claude Code agent turn instead
+// of a metered API call.
+export async function storeDigest(items: EmailMessage[]): Promise<EmailDigest> {
   const sql = getDb();
   const rows = await sql`
     insert into email_digest (id, computed_at, items)
@@ -44,4 +38,18 @@ export async function computeAndStoreDigest(): Promise<EmailDigest> {
 
   const computedAt = rows[0]?.computedAt as string;
   return { computedAt, items };
+}
+
+export async function computeAndStoreDigest(): Promise<EmailDigest> {
+  const messages = await getInboxSummary();
+  const triaged = await triageEmails(messages);
+
+  const byId = new Map(messages.map((message) => [message.id, message]));
+  const items: EmailMessage[] = [];
+  for (const { id, reason } of triaged) {
+    const message = byId.get(id);
+    if (message) items.push({ ...message, reason });
+  }
+
+  return storeDigest(items);
 }

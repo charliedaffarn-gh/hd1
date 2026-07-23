@@ -31,12 +31,25 @@ created automatically the first time the app looks for it. Checking a task
 off on the tablet updates Google Tasks directly, so it stays in sync with
 the Google Tasks app on everyone's phone too.
 
-Unread mail across every connected inbox is triaged once a night by Claude
-(Haiku) via a Vercel Cron job (`vercel.json`, `/api/cron/email-digest`,
-protected by `CRON_SECRET`) and cached in Postgres. The Email panel reads
-that cached digest on every poll — genuinely time-sensitive items (school
-notices, deliveries, bills, RSVPs) each get a short reason; marketing and
-newsletters are filtered out entirely.
+Unread mail across every connected inbox is triaged once a night and cached
+in Postgres; the Email panel just reads that cached digest on every poll —
+genuinely time-sensitive items (school notices, deliveries, bills, RSVPs)
+each get a short reason, marketing and newsletters are filtered out
+entirely. There are two independent ways this digest gets computed, and
+either (or both) can be running at once — whichever last wrote the
+`email_digest` row is what the panel shows:
+
+1. **Vercel Cron + Anthropic API** (`vercel.json`, `GET /api/cron/email-digest`,
+   `CRON_SECRET`-protected): the original path, fires nightly, calls Claude
+   Haiku directly via `ANTHROPIC_API_KEY`. Small ongoing API cost.
+2. **A Claude Code Routine, no API key needed**: a scheduled Routine reads
+   `GET /api/cron/raw-inbox` (same unread-mail fan-out as above, just
+   exposed read-only), does the same triage judgment itself as part of an
+   agent turn instead of a metered API call, then writes the result via
+   `POST /api/cron/email-digest`. Both new routes share one
+   `DIGEST_IMPORT_SECRET` bearer secret. Costs nothing beyond your existing
+   Claude usage; the tradeoff is it depends on that Routine continuing to
+   fire reliably, rather than Vercel's fully self-contained cron.
 
 Alongside the nightly triage, any message manually labeled
 **`NeedsAttention`** (name configurable via `GMAIL_ATTENTION_LABEL`) in any
@@ -63,10 +76,11 @@ and `SESSION_SECRET` (generate the latter with `openssl rand -base64 32`) to
 run the dashboard and gate locally. The Google/`DATABASE_URL` variables are
 only needed once you want `/settings` and the OAuth flow working locally too
 — without them the rest of the app still runs, `/settings` just errors.
-`ANTHROPIC_API_KEY` and `CRON_SECRET` are only needed to run the nightly
-email digest locally (`curl -H "Authorization: Bearer $CRON_SECRET"
-http://localhost:3000/api/cron/email-digest`) — without them the Email panel
-still renders, it just shows "No digest yet."
+`ANTHROPIC_API_KEY` and `CRON_SECRET` are only needed to run the
+Anthropic-API digest path locally (`curl -H "Authorization: Bearer
+$CRON_SECRET" http://localhost:3000/api/cron/email-digest`); `DIGEST_IMPORT_SECRET`
+is only needed for the Routine-based path's two routes. Without any of
+them the Email panel still renders, it just shows "No digest yet."
 
 ```bash
 npm install

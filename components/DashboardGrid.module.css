@@ -17,9 +17,10 @@
   flex: 1;
   min-height: 0;
   display: grid;
-  /* Email carries the longest text (subjects, reasons) and needs the most
-     room; task titles are short one-liners and read fine narrower. */
-  grid-template-columns: 1fr 0.75fr 1.5fr;
+  /* Email still carries the longest text (subjects, reasons), but real
+     task titles run longer than expected and were wrapping too — give
+     Tasks the same room as Calendar and take the difference from Email. */
+  grid-template-columns: 1fr 1fr 1.25fr;
   gap: 1.5rem;
 }
 

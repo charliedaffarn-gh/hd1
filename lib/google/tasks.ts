@@ -43,7 +43,10 @@ export async function listTasks(): Promise<Task[]> {
   const { tasks, tasklistId } = await getTasksClient();
   const { data } = await tasks.tasks.list({
     tasklist: tasklistId,
-    showCompleted: true,
+    // Completed tasks disappear from the dashboard the moment they're
+    // checked off rather than lingering struck-through — no need to fetch
+    // them at all.
+    showCompleted: false,
     maxResults: 100,
   });
 

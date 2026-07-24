@@ -31,11 +31,6 @@
   accent-color: var(--accent);
 }
 
-.doneText {
-  color: var(--text-muted);
-  text-decoration: line-through;
-}
-
 .form {
   display: flex;
   gap: 0.5rem;

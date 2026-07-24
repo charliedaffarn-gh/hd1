@@ -23,9 +23,8 @@ export default function TasksPanel() {
 
   const tasks = data?.tasks ?? [];
 
-  function toggleTask(task: Task) {
-    const done = !task.done;
-    const optimisticTasks = tasks.map((t) => (t.id === task.id ? { ...t, done } : t));
+  function completeTask(task: Task) {
+    const remaining = tasks.filter((t) => t.id !== task.id);
 
     mutate(
       TASKS_KEY,
@@ -33,12 +32,12 @@ export default function TasksPanel() {
         const res = await fetch(`/api/tasks/${task.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ done }),
+          body: JSON.stringify({ done: true }),
         });
         if (!res.ok) throw new Error("Failed to update task");
-        return { tasks: optimisticTasks };
+        return { tasks: remaining };
       },
-      { optimisticData: { tasks: optimisticTasks }, rollbackOnError: true, revalidate: false },
+      { optimisticData: { tasks: remaining }, rollbackOnError: true, revalidate: false },
     );
   }
 
@@ -91,11 +90,10 @@ export default function TasksPanel() {
               <label className={styles.label}>
                 <input
                   type="checkbox"
-                  checked={task.done}
-                  onChange={() => toggleTask(task)}
+                  onChange={() => completeTask(task)}
                   className={styles.checkbox}
                 />
-                <span className={task.done ? styles.doneText : undefined}>{task.title}</span>
+                <span>{task.title}</span>
               </label>
             </li>
           ))}

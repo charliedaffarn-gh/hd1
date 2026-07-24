@@ -37,12 +37,18 @@ body {
   height: 100%;
 }
 
+html {
+  /* Base for every rem-sized value in the app — reduced from the 16px
+     default so panel text wraps less on smaller/real-device viewports. */
+  font-size: 14px;
+}
+
 body {
   margin: 0;
   background: var(--page-plane);
   color: var(--text-primary);
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 18px;
+  font-size: 16px;
   overflow: hidden;
 }
 

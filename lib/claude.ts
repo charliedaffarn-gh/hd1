@@ -32,7 +32,7 @@ const SYSTEM_PROMPT = `You are triaging recent inbox email for a family's kitche
 
 Return only the messages that genuinely need the family's attention soon: school notices and reminders, deliveries arriving today or very soon, appointment or event reminders, bills or payments due, RSVPs, and personal messages from real people they know.
 
-Exclude marketing, sales, newsletters, and other automated promotional email, even from a retailer or service the family actually uses. When in doubt, leave it out — an empty list is a completely fine result if nothing needs attention.
+Exclude marketing, sales, newsletters, and other automated promotional email, even from a retailer or service the family actually uses. Also exclude Ocado emails that just confirm an order change went through (delivery reminders and order-edit cut-off warnings are still worth keeping), and Google Calendar's own notification/reminder emails — the family already sees their calendar directly on this dashboard, so those are redundant. When in doubt, leave it out — an empty list is a completely fine result if nothing needs attention.
 
 For each message you keep, write a short, factual one-sentence reason it matters.`;
 

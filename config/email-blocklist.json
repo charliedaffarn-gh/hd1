@@ -1,5 +1,11 @@
-[
-  { "sender": "noreply@example.com" },
-  { "subjectContains": "EXAMPLE_KEYWORD_DELETE_ME" },
-  { "other": "EXAMPLE_OTHER_DELETE_ME" }
-]
+{
+  "sender": [
+    "noreply@example.com"
+  ],
+  "subjectContains": [
+    "EXAMPLE_KEYWORD_DELETE_ME"
+  ],
+  "other": [
+    "EXAMPLE_OTHER_DELETE_ME"
+  ]
+}

@@ -12,15 +12,23 @@ const MAX_FLAGGED_PER_ACCOUNT = 20;
 const DEFAULT_ATTENTION_LABEL = "NeedsAttention";
 const DEFAULT_TRIAGE_MAX_AGE_DAYS = 30;
 
-interface BlockRule {
-  sender?: string;
-  subjectContains?: string;
-  other?: string;
+interface BlockLists {
+  sender?: string[];
+  subjectContains?: string[];
+  other?: string[];
 }
 
 // Cast for safety regardless of the file's exact contents at any given
 // time (an empty array literal, in particular, infers as never[]).
-const BLOCK_RULES = blockRulesList as BlockRule[];
+const blockLists = blockRulesList as BlockLists;
+
+function cleanList(values: string[] | undefined): string[] {
+  return (values ?? []).map((value) => value.trim().toLowerCase()).filter(Boolean);
+}
+
+const BLOCKED_SENDERS = new Set(cleanList(blockLists.sender));
+const BLOCKED_SUBJECT_WORDS = cleanList(blockLists.subjectContains);
+const BLOCKED_OTHER_WORDS = cleanList(blockLists.other);
 
 function getHeader(message: gmail_v1.Schema$Message, name: string): string {
   const header = message.payload?.headers?.find(
@@ -39,36 +47,24 @@ function parseFromEmail(from: string): string {
   return (match ? match[1] : from).trim().toLowerCase();
 }
 
-// A message is blocked if it matches ANY populated field on ANY rule.
+// A message is blocked if it matches an entry in any of the three lists.
 // "sender" is an exact address match; "subjectContains" and "other" are
 // case-insensitive substring matches — "other" checks sender, subject, and
 // snippet together, a broader catch-all for anything the first two don't
 // neatly cover.
 function matchesBlockRule(from: string, subject: string, snippet: string): boolean {
   const fromEmail = parseFromEmail(from);
-  const fromLower = from.toLowerCase();
+  if (BLOCKED_SENDERS.has(fromEmail)) return true;
+
   const subjectLower = subject.toLowerCase();
+  if (BLOCKED_SUBJECT_WORDS.some((needle) => subjectLower.includes(needle))) return true;
+
+  const fromLower = from.toLowerCase();
   const snippetLower = snippet.toLowerCase();
-
-  return BLOCK_RULES.some((rule) => {
-    const sender = rule.sender?.trim().toLowerCase();
-    if (sender && fromEmail === sender) return true;
-
-    const subjectNeedle = rule.subjectContains?.trim().toLowerCase();
-    if (subjectNeedle && subjectLower.includes(subjectNeedle)) return true;
-
-    const otherNeedle = rule.other?.trim().toLowerCase();
-    if (
-      otherNeedle &&
-      (fromLower.includes(otherNeedle) ||
-        subjectLower.includes(otherNeedle) ||
-        snippetLower.includes(otherNeedle))
-    ) {
-      return true;
-    }
-
-    return false;
-  });
+  return BLOCKED_OTHER_WORDS.some(
+    (needle) =>
+      fromLower.includes(needle) || subjectLower.includes(needle) || snippetLower.includes(needle),
+  );
 }
 
 function getAttentionLabel(): string {

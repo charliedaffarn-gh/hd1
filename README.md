@@ -74,25 +74,36 @@ has read-only Gmail access by design. If you want it gone from Gmail too,
 archive or unlabel it there separately.
 
 To permanently exclude something from the nightly triage — a repeat
-false-positive that keeps getting flagged — add a rule to
-[`config/email-blocklist.json`](config/email-blocklist.json). It's a JSON
-array where each entry is one rule with exactly one of these fields set:
+false-positive that keeps getting flagged — add it to
+[`config/email-blocklist.json`](config/email-blocklist.json): three
+separate lists (three "columns"), one per way of matching. A message is
+blocked if it turns up in any of them:
 
-| Field | Blocks when... | Example |
+| Column | Blocks when... | Example entry |
 |---|---|---|
-| `sender` | the message's exact email address matches | `{ "sender": "noreply@example.com" }` |
-| `subjectContains` | the subject line contains this text | `{ "subjectContains": "unsubscribe" }` |
-| `other` | this text appears anywhere — sender, subject, or snippet | `{ "other": "black friday" }` |
+| `sender` | the message's exact email address matches | `"noreply@example.com"` |
+| `subjectContains` | the subject line contains this text | `"unsubscribe"` |
+| `other` | this text appears anywhere — sender, subject, or snippet | `"black friday"` |
 
-Matching is case-insensitive. The file ships with one placeholder example
-of each kind (obviously-fake values like `EXAMPLE_KEYWORD_DELETE_ME`) so
-the syntax is easy to copy — replace or remove them and add real rules the
-same way, one object per rule. Edit the file directly in GitHub's web UI
-(or locally) and push/merge — the next Vercel deploy picks it up
-automatically, no other setup needed. This only filters the automated
-triage's candidate pool; it does *not* apply to `NeedsAttention`-labeled
-mail, since a manual label is a deliberate override that should still win
-even for a generally-blocked sender.
+To add one, find the right list and add a new quoted line, comma-separated
+from the one above it:
+
+```json
+"sender": [
+  "noreply@example.com",
+  "another-sender@example.com"
+]
+```
+
+Matching is case-insensitive. Each list starts with one placeholder
+example (obviously-fake values like `EXAMPLE_KEYWORD_DELETE_ME`) so the
+syntax is easy to copy — replace or remove them and add real entries the
+same way. Edit the file directly in GitHub's web UI (or locally) and
+push/merge — the next Vercel deploy picks it up automatically, no other
+setup needed. This only filters the automated triage's candidate pool; it
+does *not* apply to `NeedsAttention`-labeled mail, since a manual label is
+a deliberate override that should still win even for a generally-blocked
+sender.
 
 Each item in the Email panel also has a checkbox to dismiss it once you've
 dealt with it. This is dashboard-side only — it hides the message from

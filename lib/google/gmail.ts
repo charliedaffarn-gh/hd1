@@ -5,18 +5,22 @@ import type { RawEmailMessage } from "@/types";
 // Imported (not read via fs at request time) so Vercel's build always
 // bundles it correctly — a runtime fs.readFileSync on a repo file is not
 // reliably included in the serverless function's deployment.
-import blockedSendersList from "@/config/email-blocklist.json";
+import blockRulesList from "@/config/email-blocklist.json";
 
 const MAX_TRIAGE_CANDIDATES_PER_ACCOUNT = 40;
 const MAX_FLAGGED_PER_ACCOUNT = 20;
 const DEFAULT_ATTENTION_LABEL = "NeedsAttention";
 const DEFAULT_TRIAGE_MAX_AGE_DAYS = 30;
-// Cast needed because an empty array literal in the JSON file infers as
-// never[] rather than string[] — true regardless of the file's contents
-// at any given time, so this stays correct once entries are added too.
-const BLOCKED_SENDERS = new Set(
-  (blockedSendersList as string[]).map((address) => address.toLowerCase()),
-);
+
+interface BlockRule {
+  sender?: string;
+  subjectContains?: string;
+  other?: string;
+}
+
+// Cast for safety regardless of the file's exact contents at any given
+// time (an empty array literal, in particular, infers as never[]).
+const BLOCK_RULES = blockRulesList as BlockRule[];
 
 function getHeader(message: gmail_v1.Schema$Message, name: string): string {
   const header = message.payload?.headers?.find(
@@ -33,6 +37,38 @@ function parseFromName(from: string): string {
 function parseFromEmail(from: string): string {
   const match = from.match(/<([^<>]+)>/);
   return (match ? match[1] : from).trim().toLowerCase();
+}
+
+// A message is blocked if it matches ANY populated field on ANY rule.
+// "sender" is an exact address match; "subjectContains" and "other" are
+// case-insensitive substring matches — "other" checks sender, subject, and
+// snippet together, a broader catch-all for anything the first two don't
+// neatly cover.
+function matchesBlockRule(from: string, subject: string, snippet: string): boolean {
+  const fromEmail = parseFromEmail(from);
+  const fromLower = from.toLowerCase();
+  const subjectLower = subject.toLowerCase();
+  const snippetLower = snippet.toLowerCase();
+
+  return BLOCK_RULES.some((rule) => {
+    const sender = rule.sender?.trim().toLowerCase();
+    if (sender && fromEmail === sender) return true;
+
+    const subjectNeedle = rule.subjectContains?.trim().toLowerCase();
+    if (subjectNeedle && subjectLower.includes(subjectNeedle)) return true;
+
+    const otherNeedle = rule.other?.trim().toLowerCase();
+    if (
+      otherNeedle &&
+      (fromLower.includes(otherNeedle) ||
+        subjectLower.includes(otherNeedle) ||
+        snippetLower.includes(otherNeedle))
+    ) {
+      return true;
+    }
+
+    return false;
+  });
 }
 
 function getAttentionLabel(): string {
@@ -76,7 +112,14 @@ async function fetchAccountMessages(
   );
 
   const kept = applyBlocklist
-    ? messages.filter((message) => !BLOCKED_SENDERS.has(parseFromEmail(getHeader(message, "From"))))
+    ? messages.filter(
+        (message) =>
+          !matchesBlockRule(
+            getHeader(message, "From"),
+            getHeader(message, "Subject"),
+            message.snippet ?? "",
+          ),
+      )
     : messages;
 
   return kept.map((message) => ({

@@ -73,6 +73,16 @@ resurfacing it) but never modifies Gmail itself, since the app only ever
 has read-only Gmail access by design. If you want it gone from Gmail too,
 archive or unlabel it there separately.
 
+To permanently exclude a sender from the nightly triage — a repeat
+false-positive that keeps getting flagged — add their email address to
+[`config/email-blocklist.json`](config/email-blocklist.json), a plain
+JSON array of lowercase addresses (e.g. `["noreply@example.com"]`). Edit
+it directly in GitHub's web UI (or locally) and push/merge — the next
+Vercel deploy picks it up automatically, no other setup needed. This only
+filters the automated triage's candidate pool; it does *not* apply to
+`NeedsAttention`-labeled mail, since a manual label is a deliberate
+override that should still win even for a generally-blocked sender.
+
 ## Stack
 
 Next.js (App Router) + TypeScript, deployed on Vercel. Calendar, email, and

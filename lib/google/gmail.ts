@@ -2,11 +2,21 @@ import { google, type gmail_v1 } from "googleapis";
 import { listAccountsWithTokens } from "@/lib/accounts";
 import { buildOAuth2Client } from "./oauth";
 import type { RawEmailMessage } from "@/types";
+// Imported (not read via fs at request time) so Vercel's build always
+// bundles it correctly — a runtime fs.readFileSync on a repo file is not
+// reliably included in the serverless function's deployment.
+import blockedSendersList from "@/config/email-blocklist.json";
 
 const MAX_TRIAGE_CANDIDATES_PER_ACCOUNT = 40;
 const MAX_FLAGGED_PER_ACCOUNT = 20;
 const DEFAULT_ATTENTION_LABEL = "NeedsAttention";
 const DEFAULT_TRIAGE_MAX_AGE_DAYS = 30;
+// Cast needed because an empty array literal in the JSON file infers as
+// never[] rather than string[] — true regardless of the file's contents
+// at any given time, so this stays correct once entries are added too.
+const BLOCKED_SENDERS = new Set(
+  (blockedSendersList as string[]).map((address) => address.toLowerCase()),
+);
 
 function getHeader(message: gmail_v1.Schema$Message, name: string): string {
   const header = message.payload?.headers?.find(
@@ -18,6 +28,11 @@ function getHeader(message: gmail_v1.Schema$Message, name: string): string {
 function parseFromName(from: string): string {
   const match = from.match(/^"?([^"<]+)"?\s*<.*>$/);
   return (match ? match[1] : from).trim();
+}
+
+function parseFromEmail(from: string): string {
+  const match = from.match(/<([^<>]+)>/);
+  return (match ? match[1] : from).trim().toLowerCase();
 }
 
 function getAttentionLabel(): string {
@@ -34,6 +49,7 @@ async function fetchAccountMessages(
   refreshToken: string,
   query: string,
   maxResults: number,
+  applyBlocklist: boolean,
 ): Promise<RawEmailMessage[]> {
   const client = buildOAuth2Client();
   client.setCredentials({ refresh_token: refreshToken });
@@ -59,7 +75,11 @@ async function fetchAccountMessages(
     }),
   );
 
-  return messages.map((message) => ({
+  const kept = applyBlocklist
+    ? messages.filter((message) => !BLOCKED_SENDERS.has(parseFromEmail(getHeader(message, "From"))))
+    : messages;
+
+  return kept.map((message) => ({
     id: `${email}:${message.id}`,
     from: parseFromName(getHeader(message, "From")),
     subject: getHeader(message, "Subject") || "(no subject)",
@@ -74,12 +94,19 @@ async function fetchAccountMessages(
 async function fetchAcrossAccounts(
   query: string,
   maxResultsPerAccount: number,
+  applyBlocklist: boolean,
 ): Promise<RawEmailMessage[]> {
   const accounts = await listAccountsWithTokens();
 
   const results = await Promise.allSettled(
     accounts.map((account) =>
-      fetchAccountMessages(account.email, account.refreshToken, query, maxResultsPerAccount),
+      fetchAccountMessages(
+        account.email,
+        account.refreshToken,
+        query,
+        maxResultsPerAccount,
+        applyBlocklist,
+      ),
     ),
   );
 
@@ -104,14 +131,20 @@ async function fetchAcrossAccounts(
 // is the practical way to keep something out of future runs.
 export async function getInboxSummary(): Promise<RawEmailMessage[]> {
   const maxAgeDays = getTriageMaxAgeDays();
-  return fetchAcrossAccounts(`in:inbox newer_than:${maxAgeDays}d`, MAX_TRIAGE_CANDIDATES_PER_ACCOUNT);
+  return fetchAcrossAccounts(
+    `in:inbox newer_than:${maxAgeDays}d`,
+    MAX_TRIAGE_CANDIDATES_PER_ACCOUNT,
+    true,
+  );
 }
 
 // Mail any family member has manually labeled as needing attention, across
 // every connected account, regardless of read state or whether it's still
 // in the inbox. Checked live on every dashboard poll (cheap, no LLM call)
 // rather than waiting on the nightly triage, since a manual flag is by
-// definition something that matters right now.
+// definition something that matters right now. The sender blocklist does
+// NOT apply here — a manual label is a deliberate, specific override that
+// should win even for a generally-blocked sender.
 export async function getFlaggedMessages(): Promise<RawEmailMessage[]> {
-  return fetchAcrossAccounts(`label:"${getAttentionLabel()}"`, MAX_FLAGGED_PER_ACCOUNT);
+  return fetchAcrossAccounts(`label:"${getAttentionLabel()}"`, MAX_FLAGGED_PER_ACCOUNT, false);
 }

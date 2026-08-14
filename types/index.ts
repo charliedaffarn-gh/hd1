@@ -5,6 +5,9 @@ export interface CalendarEvent {
   end: string; // ISO 8601
   allDay?: boolean;
   calendarName?: string;
+  // Absent (or "family") for the connected Google Calendar(s); "hitchin"
+  // for the monthly local "What's On" import.
+  source?: "family" | "hitchin";
 }
 
 export interface RawEmailMessage {

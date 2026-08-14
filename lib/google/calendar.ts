@@ -21,15 +21,23 @@ async function getAuthorizedClient() {
   return client;
 }
 
+// Today through +7 days — shared with the Hitchin events cache filter so a
+// stale monthly-refreshed entry never shows up outside the same window the
+// live family calendar is displaying.
+export function getDisplayWindow(): { start: Date; end: Date } {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 7);
+  return { start, end };
+}
+
 export async function getUpcomingEvents(): Promise<CalendarEvent[]> {
   const auth = await getAuthorizedClient();
   const calendar = google.calendar({ version: "v3", auth });
   const calendarIds = getCalendarIds();
 
-  const timeMin = new Date();
-  timeMin.setHours(0, 0, 0, 0);
-  const timeMax = new Date(timeMin);
-  timeMax.setDate(timeMax.getDate() + 7);
+  const { start: timeMin, end: timeMax } = getDisplayWindow();
 
   const results = await Promise.allSettled(
     calendarIds.map((calendarId) =>

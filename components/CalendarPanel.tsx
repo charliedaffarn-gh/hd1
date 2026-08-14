@@ -64,12 +64,19 @@ export default function CalendarPanel() {
         groups.map((group) => (
           <div key={group.label} className={styles.group}>
             <div className={styles.dayLabel}>{group.label}</div>
-            {group.events.map((event) => (
-              <div key={event.id} className={styles.event}>
-                <div className={styles.eventTime}>{formatEventTime(event)}</div>
-                <div className={styles.eventTitle}>{event.title}</div>
-              </div>
-            ))}
+            {group.events.map((event) => {
+              const isLocal = event.source === "hitchin";
+              return (
+                <div key={event.id} className={styles.event}>
+                  <div className={`${styles.eventTime} ${isLocal ? styles.localEvent : ""}`}>
+                    {formatEventTime(event)}
+                  </div>
+                  <div className={`${styles.eventTitle} ${isLocal ? styles.localEvent : ""}`}>
+                    {event.title}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ))
       )}

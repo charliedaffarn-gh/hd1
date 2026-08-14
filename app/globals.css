@@ -12,6 +12,7 @@
   --status-warning: #fab219;
   --status-serious: #ec835a;
   --status-critical: #d03b3b;
+  --local-event: #8a4fd1;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -25,6 +26,7 @@
     --border: rgba(255, 255, 255, 0.1);
     --gridline: #2c2c2a;
     --accent: #3987e5;
+    --local-event: #b18cea;
   }
 }
 

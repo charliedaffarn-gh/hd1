@@ -41,3 +41,9 @@
 .eventTitle {
   font-weight: 500;
 }
+
+/* "What's On in Hitchin" import — color-only distinction from family events,
+   applied to both the time and title of the same entry. */
+.localEvent {
+  color: var(--local-event);
+}

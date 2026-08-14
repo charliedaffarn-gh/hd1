@@ -14,6 +14,8 @@ attention, and a shared family to-do list, built for a wall-mounted tablet.
 - [x] Nightly Claude-based email triage (replaces Gmail's native "Important"
       label with an LLM-curated "needs attention" list + one-line reason)
 - [x] Real to-do list (Google Tasks-backed, dedicated "Family" list)
+- [x] Local "What's On in Hitchin" events on the Calendar panel (monthly
+      import, no API key)
 - [ ] Kitchen-tablet polish (kiosk mode, resilience, final setup docs)
 
 The full manual setup checklist (Google Cloud Console, Vercel, Neon) will
@@ -24,6 +26,18 @@ passcode gate) and click "Connect Google Account" to link the family Google
 account — this powers Calendar, Tasks, and one Email source. From the same
 page, "Connect another Gmail inbox" links additional personal inboxes
 (Gmail-only access) into the same collated Email panel.
+
+The Calendar panel shows the connected Google Calendar(s)
+(`GOOGLE_CALENDAR_IDS`) for the next 7 days, plus a second source: local
+**What's On in Hitchin** events, shown in a different colour from the
+family's own events so the two are easy to tell apart at a glance. That
+listing barely changes week to week, so it's refreshed monthly rather than
+live — a Claude Code Routine reads the public listings once a month and
+posts the result to `POST /api/cron/hitchin-events`, reusing the same
+`DIGEST_IMPORT_SECRET` bearer secret as the email Routine (no separate API
+key or new env var needed). If that Routine hasn't run yet, or its cache is
+empty, the Calendar panel just shows the family's own events as normal — a
+missing or stale Hitchin cache never blanks the panel.
 
 The Family To-Do panel reads and writes a dedicated Google Tasks list (name
 set by `GOOGLE_TASKLIST_NAME`, default "Family") on the primary account,
@@ -104,13 +118,6 @@ setup needed. This only filters the automated triage's candidate pool; it
 does *not* apply to `NeedsAttention`-labeled mail, since a manual label is
 a deliberate override that should still win even for a generally-blocked
 sender.
-
-Each item in the Email panel also has a checkbox to dismiss it once you've
-dealt with it. This is dashboard-side only — it hides the message from
-future polls (even if the triage or a label would otherwise keep
-resurfacing it) but never modifies Gmail itself, since the app only ever
-has read-only Gmail access by design. If you want it gone from Gmail too,
-archive or unlabel it there separately.
 
 ## Stack
 

@@ -26,3 +26,12 @@ create table if not exists dismissed_emails (
   message_id text primary key,
   dismissed_at timestamptz not null default now()
 );
+
+-- Single-row cache: the latest local "What's On in Hitchin" scrape.
+-- Refreshed monthly (the listing barely changes), not nightly.
+create table if not exists hitchin_events (
+  id integer primary key default 1,
+  computed_at timestamptz not null default now(),
+  items jsonb not null,
+  constraint hitchin_events_singleton check (id = 1)
+);

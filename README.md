@@ -29,15 +29,18 @@ page, "Connect another Gmail inbox" links additional personal inboxes
 
 The Calendar panel shows the connected Google Calendar(s)
 (`GOOGLE_CALENDAR_IDS`) for the next 7 days, plus a second source: local
-**What's On in Hitchin** events, shown in a different colour from the
-family's own events so the two are easy to tell apart at a glance. That
-listing barely changes week to week, so it's refreshed monthly rather than
-live — a Claude Code Routine reads the public listings once a month and
-posts the result to `POST /api/cron/hitchin-events`, reusing the same
-`DIGEST_IMPORT_SECRET` bearer secret as the email Routine (no separate API
-key or new env var needed). If that Routine hasn't run yet, or its cache is
-empty, the Calendar panel just shows the family's own events as normal — a
-missing or stale Hitchin cache never blanks the panel.
+**What's On in Hitchin** events happening that weekend, shown in a
+different colour from the family's own events so the two are easy to tell
+apart at a glance. Only Saturday/Sunday events are shown — most weekday
+listings (markets, toddler groups, midweek talks) aren't relevant to the
+family, so they're filtered out. That listing barely changes week to week,
+so it's refreshed monthly rather than live — a Claude Code Routine reads
+the public listings once a month and posts the result to `POST
+/api/cron/hitchin-events`, reusing the same `DIGEST_IMPORT_SECRET` bearer
+secret as the email Routine (no separate API key or new env var needed).
+If that Routine hasn't run yet, or its cache is empty, the Calendar panel
+just shows the family's own events as normal — a missing or stale Hitchin
+cache never blanks the panel.
 
 The Family To-Do panel reads and writes a dedicated Google Tasks list (name
 set by `GOOGLE_TASKLIST_NAME`, default "Family") on the primary account,

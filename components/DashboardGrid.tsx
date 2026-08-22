@@ -1,5 +1,6 @@
 import Clock from "./Clock";
 import AppShortcuts from "./AppShortcuts";
+import DayTripIdeasButton from "./DayTripIdeasButton";
 import CalendarPanel from "./CalendarPanel";
 import EmailPanel from "./EmailPanel";
 import TasksPanel from "./TasksPanel";
@@ -10,7 +11,10 @@ export default function DashboardGrid() {
     <div className={styles.grid}>
       <header className={styles.header}>
         <Clock />
-        <AppShortcuts />
+        <div className={styles.headerControls}>
+          <DayTripIdeasButton />
+          <AppShortcuts />
+        </div>
       </header>
       <div className={styles.panels}>
         <CalendarPanel />

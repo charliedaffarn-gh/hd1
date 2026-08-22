@@ -13,6 +13,11 @@
   align-items: flex-start;
 }
 
+.headerControls {
+  display: flex;
+  gap: 1rem;
+}
+
 .panels {
   flex: 1;
   min-height: 0;

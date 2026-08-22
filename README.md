@@ -16,6 +16,7 @@ attention, and a shared family to-do list, built for a wall-mounted tablet.
 - [x] Real to-do list (Google Tasks-backed, dedicated "Family" list)
 - [x] Local "What's On in Hitchin" events on the Calendar panel (monthly
       import, no API key)
+- [x] Weekly family day-trip suggestions, shown via a header popup
 - [ ] Kitchen-tablet polish (kiosk mode, resilience, final setup docs)
 
 The full manual setup checklist (Google Cloud Console, Vercel, Neon) will
@@ -41,6 +42,16 @@ secret as the email Routine (no separate API key or new env var needed).
 If that Routine hasn't run yet, or its cache is empty, the Calendar panel
 just shows the family's own events as normal — a missing or stale Hitchin
 cache never blanks the panel.
+
+The **Weekend Ideas** button in the header (next to the app shortcuts) pops
+up 3 family day-trip suggestions — why each fits, approximate travel time,
+anything that needs booking, and a wet-weather fallback. Originally a
+ChatGPT scheduled task the user ran by hand; migrated to the same
+Routine-import pattern as the other two features above, on a weekly
+schedule, reusing `DIGEST_IMPORT_SECRET` again (still no new env var). It's
+a popup rather than a fourth panel since the three main panels already fill
+the tablet screen. Only fetched when the button is tapped, not polled in
+the background, since it only changes once a week.
 
 The Family To-Do panel reads and writes a dedicated Google Tasks list (name
 set by `GOOGLE_TASKLIST_NAME`, default "Family") on the primary account,

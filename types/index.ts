@@ -29,3 +29,12 @@ export interface Task {
   title: string;
   done: boolean;
 }
+
+// One weekly-refreshed weekend day-trip suggestion.
+export interface DayTripIdea {
+  title: string;
+  whyItFits: string;
+  travelTime: string;
+  booking: string;
+  wetWeatherFallback: string;
+}

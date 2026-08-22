@@ -35,3 +35,12 @@ create table if not exists hitchin_events (
   items jsonb not null,
   constraint hitchin_events_singleton check (id = 1)
 );
+
+-- Single-row cache: this week's family weekend day-trip suggestions.
+-- Refreshed weekly, shown on demand via a popup rather than a panel.
+create table if not exists day_trip_ideas (
+  id integer primary key default 1,
+  computed_at timestamptz not null default now(),
+  items jsonb not null,
+  constraint day_trip_ideas_singleton check (id = 1)
+);

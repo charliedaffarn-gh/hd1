@@ -54,12 +54,22 @@ export async function listTasks(): Promise<Task[]> {
     (item): item is tasks_v1.Schema$Task & { id: string; title: string } =>
       Boolean(item.id && item.title),
   );
-  items.sort((a, b) => (a.position ?? "").localeCompare(b.position ?? ""));
+
+  // Due-dated tasks float to the top (soonest/most overdue first) since
+  // they're the ones that actually need acting on; everything else keeps
+  // its normal drag-order position from the Tasks app.
+  items.sort((a, b) => {
+    if (a.due && b.due) return a.due.localeCompare(b.due);
+    if (a.due) return -1;
+    if (b.due) return 1;
+    return (a.position ?? "").localeCompare(b.position ?? "");
+  });
 
   return items.map((item) => ({
     id: item.id,
     title: item.title,
     done: item.status === "completed",
+    due: item.due ?? undefined,
   }));
 }
 

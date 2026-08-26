@@ -28,6 +28,9 @@ export interface Task {
   id: string;
   title: string;
   done: boolean;
+  // ISO 8601, present only if set in Google Tasks. Always midnight UTC —
+  // Google Tasks only supports a due date, never a time of day.
+  due?: string;
 }
 
 // One weekly-refreshed weekend day-trip suggestion.

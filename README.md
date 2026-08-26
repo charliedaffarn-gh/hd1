@@ -57,7 +57,11 @@ The Family To-Do panel reads and writes a dedicated Google Tasks list (name
 set by `GOOGLE_TASKLIST_NAME`, default "Family") on the primary account,
 created automatically the first time the app looks for it. Checking a task
 off on the tablet updates Google Tasks directly, so it stays in sync with
-the Google Tasks app on everyone's phone too.
+the Google Tasks app on everyone's phone too. Due dates set from the Tasks
+app on any phone are picked up automatically: due-dated tasks sort above
+everything else (soonest/most overdue first), and anything due today or
+overdue is highlighted. There's no way to set a due date from the tablet
+itself — add one from the Tasks app instead.
 
 Recent inbox mail across every connected account — read or unread, within
 the last `GMAIL_TRIAGE_MAX_AGE_DAYS` (default 30) — is triaged once a

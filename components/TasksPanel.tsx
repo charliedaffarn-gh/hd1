@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import useSWR, { mutate } from "swr";
 import Panel from "./Panel";
+import { formatTaskDue, getTaskDueStatus } from "@/lib/format";
 import type { Task } from "@/types";
 import styles from "./TasksPanel.module.css";
 
@@ -85,18 +86,36 @@ export default function TasksPanel() {
         <p className={styles.message}>No tasks yet.</p>
       ) : (
         <ul className={styles.list}>
-          {tasks.map((task) => (
-            <li key={task.id} className={styles.item}>
-              <label className={styles.label}>
-                <input
-                  type="checkbox"
-                  onChange={() => completeTask(task)}
-                  className={styles.checkbox}
-                />
-                <span>{task.title}</span>
-              </label>
-            </li>
-          ))}
+          {tasks.map((task) => {
+            const dueStatus = task.due ? getTaskDueStatus(task.due) : null;
+            const statusClass =
+              dueStatus === "overdue"
+                ? styles.overdue
+                : dueStatus === "today"
+                  ? styles.today
+                  : styles.upcoming;
+            return (
+              <li key={task.id} className={styles.item}>
+                <label className={styles.label}>
+                  <input
+                    type="checkbox"
+                    onChange={() => completeTask(task)}
+                    className={styles.checkbox}
+                  />
+                  <span className={styles.taskText}>
+                    <span className={dueStatus === "overdue" || dueStatus === "today" ? statusClass : undefined}>
+                      {task.title}
+                    </span>
+                    {task.due && (
+                      <span className={`${styles.dueBadge} ${statusClass}`}>
+                        {formatTaskDue(task.due)}
+                      </span>
+                    )}
+                  </span>
+                </label>
+              </li>
+            );
+          })}
         </ul>
       )}
     </Panel>

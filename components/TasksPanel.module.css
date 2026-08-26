@@ -24,6 +24,29 @@
   cursor: pointer;
 }
 
+.taskText {
+  display: flex;
+  flex-direction: column;
+}
+
+.dueBadge {
+  font-size: 0.8rem;
+}
+
+.overdue {
+  color: var(--status-critical);
+  font-weight: 600;
+}
+
+.today {
+  color: var(--status-warning);
+  font-weight: 600;
+}
+
+.upcoming {
+  color: var(--text-muted);
+}
+
 .checkbox {
   width: 1.5rem;
   height: 1.5rem;

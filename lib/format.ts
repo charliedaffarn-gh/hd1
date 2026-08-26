@@ -4,19 +4,40 @@ function startOfDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
-export function formatDayLabel(iso: string): string {
-  const date = new Date(iso);
-  const diffDays = Math.round(
-    (startOfDay(date).getTime() - startOfDay(new Date()).getTime()) / DAY_MS,
+function diffDaysFromToday(iso: string): number {
+  return Math.round(
+    (startOfDay(new Date(iso)).getTime() - startOfDay(new Date()).getTime()) / DAY_MS,
   );
+}
+
+export function formatDayLabel(iso: string): string {
+  const diffDays = diffDaysFromToday(iso);
 
   if (diffDays === 0) return "Today";
   if (diffDays === 1) return "Tomorrow";
-  return date.toLocaleDateString(undefined, {
+  return new Date(iso).toLocaleDateString(undefined, {
     weekday: "long",
     month: "short",
     day: "numeric",
   });
+}
+
+export type TaskDueStatus = "overdue" | "today" | "upcoming";
+
+export function getTaskDueStatus(due: string): TaskDueStatus {
+  const diffDays = diffDaysFromToday(due);
+  if (diffDays < 0) return "overdue";
+  if (diffDays === 0) return "today";
+  return "upcoming";
+}
+
+// Google Tasks only stores a due date (always midnight UTC, no time-of-day)
+// so this only ever needs to talk about days, never times.
+export function formatTaskDue(due: string): string {
+  const status = getTaskDueStatus(due);
+  if (status === "today") return "Due today";
+  if (status === "overdue") return `Overdue — was due ${formatDayLabel(due)}`;
+  return `Due ${formatDayLabel(due)}`;
 }
 
 export function formatEventTime(event: {

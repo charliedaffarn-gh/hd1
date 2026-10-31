@@ -1,4 +1,9 @@
 :root {
+  /* Light-only, deliberately — this used to follow the device's own
+     dark/light setting via prefers-color-scheme, but that meant the
+     dashboard's look depended on whatever each viewing device (tablet,
+     phone, laptop) happened to be set to, rather than being one
+     consistent, chosen appearance. */
   color-scheme: light;
   --page-plane: #f7f1e8;
   --surface: #fffdf9;
@@ -25,24 +30,6 @@
   --panel-calendar: #2f6fb3;
   --panel-tasks: #23855e;
   --panel-email: #b95a27;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --page-plane: #161210;
-    --surface: #211c18;
-    --text-primary: #f5efe8;
-    --text-secondary: #c9bfb2;
-    --text-muted: #93897d;
-    --border: rgba(245, 239, 232, 0.1);
-    --gridline: #352f29;
-    --accent: #3aab97;
-    --local-event: #9b8fab;
-    /* The original bright amber reads fine against a dark surface
-       (~9:1) — it was only light mode that needed darkening. */
-    --status-warning: #fab219;
-  }
 }
 
 * {

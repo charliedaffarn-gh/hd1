@@ -1,32 +1,47 @@
 :root {
   color-scheme: light;
-  --page-plane: #f9f9f7;
-  --surface: #fcfcfb;
-  --text-primary: #0b0b0b;
-  --text-secondary: #52514e;
-  --text-muted: #898781;
-  --border: rgba(11, 11, 11, 0.1);
-  --gridline: #e1e0d9;
-  --accent: #2a78d6;
+  --page-plane: #f7f1e8;
+  --surface: #fffdf9;
+  --text-primary: #2b2420;
+  --text-secondary: #6b5f54;
+  --text-muted: #9c9186;
+  --border: rgba(43, 36, 32, 0.12);
+  --gridline: #e8ddd0;
+  --accent: #1f7a6c;
   --status-good: #0ca30c;
-  --status-warning: #fab219;
+  /* Darker than it looks like it should be — #fab219 (kept for dark mode
+     below) only has ~1.8:1 contrast against this light surface, too faint
+     for a "due today" flag that's meant to catch the eye. */
+  --status-warning: #916308;
   --status-serious: #ec835a;
   --status-critical: #d03b3b;
-  --local-event: #8a4fd1;
+  /* Secondary/supplementary, not something that should compete with the
+     family's own events for attention — muted and desaturated on purpose,
+     but still ~4.6:1 contrast so it stays readable at a glance. */
+  --local-event: #7d69ab;
+  /* Per-panel header bar colors — same hue family as before, just the
+     only place a bold saturated color still appears now. Deep enough for
+     white header text to stay comfortably readable (~4.5:1+) at a glance. */
+  --panel-calendar: #2f6fb3;
+  --panel-tasks: #23855e;
+  --panel-email: #b95a27;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --page-plane: #0d0d0d;
-    --surface: #1a1a19;
-    --text-primary: #ffffff;
-    --text-secondary: #c3c2b7;
-    --text-muted: #898781;
-    --border: rgba(255, 255, 255, 0.1);
-    --gridline: #2c2c2a;
-    --accent: #3987e5;
-    --local-event: #b18cea;
+    --page-plane: #161210;
+    --surface: #211c18;
+    --text-primary: #f5efe8;
+    --text-secondary: #c9bfb2;
+    --text-muted: #93897d;
+    --border: rgba(245, 239, 232, 0.1);
+    --gridline: #352f29;
+    --accent: #3aab97;
+    --local-event: #9b8fab;
+    /* The original bright amber reads fine against a dark surface
+       (~9:1) — it was only light mode that needed darkening. */
+    --status-warning: #fab219;
   }
 }
 

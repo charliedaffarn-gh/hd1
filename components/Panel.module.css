@@ -14,8 +14,11 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--text-secondary);
-  margin-bottom: 0.75rem;
+  margin: -1.25rem -1.5rem 0.75rem;
+  padding: 0.85rem 1.5rem;
+  border-radius: 16px 16px 0 0;
+  background: var(--panel-accent);
+  color: #fff;
   flex-shrink: 0;
 }
 

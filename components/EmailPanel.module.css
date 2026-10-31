@@ -23,7 +23,7 @@
 .checkbox {
   width: 1.5rem;
   height: 1.5rem;
-  accent-color: var(--accent);
+  accent-color: var(--panel-accent);
 }
 
 .emailContent {

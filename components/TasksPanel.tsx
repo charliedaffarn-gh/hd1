@@ -63,6 +63,7 @@ export default function TasksPanel() {
   return (
     <Panel
       title="Family To-Do"
+      accent="var(--panel-tasks)"
       footer={
         <form onSubmit={addTask} className={styles.form}>
           <input

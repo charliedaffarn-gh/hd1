@@ -13,7 +13,7 @@
 .dayLabel {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--accent);
+  color: var(--panel-accent);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 0.5rem;

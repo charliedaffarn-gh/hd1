@@ -21,9 +21,11 @@
   --status-serious: #ec835a;
   --status-critical: #d03b3b;
   /* Secondary/supplementary, not something that should compete with the
-     family's own events for attention — muted and desaturated on purpose,
-     but still ~4.6:1 contrast so it stays readable at a glance. */
-  --local-event: #7d69ab;
+     family's own events for attention — muted and desaturated on purpose.
+     Matches --text-muted's own contrast level against the calendar tint
+     (~2.7:1) rather than body-text contrast, deliberately: the brief is
+     "shouldn't stand out," not "read easily at a glance" like the rest. */
+  --local-event: #998eb4;
   /* Per-panel header bar color. Deep enough for white header text to
      stay comfortably readable (~4.5:1+); also reused as the in-body
      accent (day labels, checkboxes), where it still holds ~4-4.6:1

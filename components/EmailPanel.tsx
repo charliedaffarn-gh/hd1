@@ -49,7 +49,7 @@ export default function EmailPanel() {
 
   if (isLoading) {
     return (
-      <Panel title="Email" accent="var(--panel-email)">
+      <Panel title="Email" accent="var(--panel-email)" tint="var(--panel-email-tint)">
         <p className={styles.message}>Loading…</p>
       </Panel>
     );
@@ -57,7 +57,7 @@ export default function EmailPanel() {
 
   if (error) {
     return (
-      <Panel title="Email" accent="var(--panel-email)">
+      <Panel title="Email" accent="var(--panel-email)" tint="var(--panel-email-tint)">
         <p className={styles.message}>Couldn&rsquo;t load email.</p>
       </Panel>
     );
@@ -68,7 +68,7 @@ export default function EmailPanel() {
   const sourceCount = new Set(messages.map((message) => message.sourceEmail)).size;
 
   return (
-    <Panel title="Email" accent="var(--panel-email)">
+    <Panel title="Email" accent="var(--panel-email)" tint="var(--panel-email-tint)">
       {messages.length === 0 ? (
         <p className={styles.message}>
           {computedAt

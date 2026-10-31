@@ -3,7 +3,7 @@
   flex-direction: column;
   min-width: 0;
   min-height: 0;
-  background: var(--surface);
+  background: var(--panel-tint, var(--surface));
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 1.25rem 1.5rem;

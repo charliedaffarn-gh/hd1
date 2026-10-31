@@ -14,9 +14,9 @@
   --gridline: #e8ddd0;
   --accent: #1f7a6c;
   --status-good: #0ca30c;
-  /* Darker than it looks like it should be — #fab219 (kept for dark mode
-     below) only has ~1.8:1 contrast against this light surface, too faint
-     for a "due today" flag that's meant to catch the eye. */
+  /* Darker than #fab219 looks like it should be — that only has ~1.8:1
+     contrast against this light surface, too faint for a "due today"
+     flag that's meant to catch the eye. */
   --status-warning: #916308;
   --status-serious: #ec835a;
   --status-critical: #d03b3b;
@@ -24,12 +24,19 @@
      family's own events for attention — muted and desaturated on purpose,
      but still ~4.6:1 contrast so it stays readable at a glance. */
   --local-event: #7d69ab;
-  /* Per-panel header bar colors — same hue family as before, just the
-     only place a bold saturated color still appears now. Deep enough for
-     white header text to stay comfortably readable (~4.5:1+) at a glance. */
+  /* Per-panel header bar color. Deep enough for white header text to
+     stay comfortably readable (~4.5:1+); also reused as the in-body
+     accent (day labels, checkboxes), where it still holds ~4-4.6:1
+     against that panel's own tint below. */
   --panel-calendar: #2f6fb3;
   --panel-tasks: #23855e;
   --panel-email: #b95a27;
+  /* Soft tinted panel body ("coloured columns") — same hue as the header
+     bar, blended lightly into the surface so body text stays easily
+     readable (~13:1) while the panel still reads as "that panel's colour". */
+  --panel-calendar-tint: #eef2f3;
+  --panel-tasks-tint: #edf3ed;
+  --panel-email-tint: #f9f0e8;
 }
 
 * {

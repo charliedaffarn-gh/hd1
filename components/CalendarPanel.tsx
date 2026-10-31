@@ -40,7 +40,7 @@ export default function CalendarPanel() {
 
   if (isLoading) {
     return (
-      <Panel title="Calendar" accent="var(--panel-calendar)">
+      <Panel title="Calendar" accent="var(--panel-calendar)" tint="var(--panel-calendar-tint)">
         <p className={styles.message}>Loading…</p>
       </Panel>
     );
@@ -48,7 +48,7 @@ export default function CalendarPanel() {
 
   if (error) {
     return (
-      <Panel title="Calendar" accent="var(--panel-calendar)">
+      <Panel title="Calendar" accent="var(--panel-calendar)" tint="var(--panel-calendar-tint)">
         <p className={styles.message}>Couldn&rsquo;t load the calendar.</p>
       </Panel>
     );
@@ -57,7 +57,7 @@ export default function CalendarPanel() {
   const groups = groupByDay(data?.events ?? []);
 
   return (
-    <Panel title="Calendar" accent="var(--panel-calendar)">
+    <Panel title="Calendar" accent="var(--panel-calendar)" tint="var(--panel-calendar-tint)">
       {groups.length === 0 ? (
         <p className={styles.message}>No upcoming events.</p>
       ) : (
